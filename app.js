@@ -30,6 +30,44 @@ function render(){if(!ready)return;const st=state();lastMetrics=[];oc.clearRect(
  queuePdf(st);$('#preview').setAttribute('aria-label',st.name?`Invitation for ${st.name}${st.family?', with family':''}`:'Original invitation preview');
 }
 function showError(message){$('#error').textContent=message;$('#error').hidden=!message}
+
+// Literal phonetic Hindi input. No dictionary, name correction, or network requests.
+// Vowels: a/aa/i/ee/u/oo/e/ai/o/au; conjuncts preserve typed consonant order.
+function romanToHindi(word){
+ const vowels={aa:['आ','ा'],ee:['ई','ी'],ii:['ई','ी'],oo:['ऊ','ू'],uu:['ऊ','ू'],ai:['ऐ','ै'],au:['औ','ौ'],a:['अ',''],i:['इ','ि'],u:['उ','ु'],e:['ए','े'],o:['ओ','ो']};
+ const consonants={rsh:'र्ष',ksh:'क्ष',chh:'छ',kh:'ख',gh:'घ',ch:'च',jh:'झ',th:'थ',dh:'ध',ph:'फ',bh:'भ',sh:'श',ng:'ङ',ny:'ञ',k:'क',g:'ग',c:'क',j:'ज',t:'त',d:'द',n:'न',p:'प',b:'ब',m:'म',y:'य',r:'र',l:'ल',v:'व',w:'व',s:'स',h:'ह',f:'फ़',z:'ज़',q:'क़',x:'क्स'};
+ const src=word.toLowerCase();let out='',pending=false;
+ for(let i=0;i<src.length;){
+  let token='';for(const n of [3,2,1]){const part=src.slice(i,i+n);if(vowels[part]||consonants[part]){token=part;break}}
+  if(!token){out+=src[i++];pending=false;continue}
+  if(vowels[token]){out+=vowels[token][pending?1:0];pending=false}
+  else{if(pending)out+='्';out+=consonants[token];pending=true}
+  i+=token.length;
+ }
+ return out.normalize('NFC');
+}
+function convertBeforeCaret(input){
+ if(state().language!=='hi'||input.selectionStart!==input.selectionEnd)return false;
+ const end=input.selectionStart,before=input.value.slice(0,end),match=before.match(/[A-Za-z]+$/);
+ if(!match)return false;
+ const start=end-match[0].length,replacement=romanToHindi(match[0]);
+ input.setRangeText(replacement,start,end,'end');return true;
+}
+for(const id of ['guest-name','address1','address2']){
+ const input=$('#'+id);
+ // beforeinput supports both desktop Space and mobile soft keyboards.
+ input.addEventListener('beforeinput',event=>{
+  if(event.isComposing||state().language!=='hi'||event.inputType!=='insertText'||!event.data||!/^[\s,.;!?]$/.test(event.data))return;
+  if(!event.cancelable)return;
+  if(convertBeforeCaret(input)){
+   event.preventDefault();input.setRangeText(event.data,input.selectionStart,input.selectionEnd,'end');
+   input.dispatchEvent(new Event('input',{bubbles:true}));
+  }
+ });
+ input.addEventListener('blur',()=>{if(convertBeforeCaret(input))input.dispatchEvent(new Event('input',{bubbles:true}))});
+
+}
+
 form.addEventListener('input',()=>{showError('');render()});
 form.addEventListener('change',()=>{const en=state().language==='en';$('#family-help').textContent=en?'चुना होने पर ऊपर “(With family)” जुड़ेगा।':'चुना होने पर ऊपर “(सपरिवार)” जुड़ेगा।';$('#guest-name').placeholder=en?'e.g. Rajesh Sharma Ji':'जैसे: राजेश शर्मा जी';$('#address1').placeholder=en?'e.g. 24, Shastri Nagar':'जैसे: 24, शास्त्री नगर';$('#address2').placeholder=en?'e.g. Jaipur, Rajasthan':'जैसे: जयपुर, राजस्थान';render()});
 $('#example').addEventListener('click',()=>{const en=state().language==='en';$('#guest-name').value=en?'Rajesh Sharma Ji':'राजेश शर्मा जी';$('#address1').value=en?'24, Shastri Nagar':'24, शास्त्री नगर';$('#address2').value=en?'Jaipur, Rajasthan':'जयपुर, राजस्थान';$('#family').checked=true;showError('');render()});
