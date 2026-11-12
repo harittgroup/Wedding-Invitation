@@ -55,7 +55,7 @@ function convertBeforeCaret(input){
  const start=end-match[0].length,replacement=romanToHindi(match[0]);
  input.setRangeText(replacement,start,end,'end');return true;
 }
-for(const id of ['guest-name','address1','address2']){
+for(const id of ['address1','address2']){
  const input=$('#'+id);
  // beforeinput supports both desktop Space and mobile soft keyboards.
  input.addEventListener('beforeinput',event=>{
@@ -69,6 +69,76 @@ for(const id of ['guest-name','address1','address2']){
  input.addEventListener('blur',()=>{if(convertBeforeCaret(input))input.dispatchEvent(new Event('input',{bubbles:true}))});
 
 }
+
+
+const nameInput=$('#guest-name'),suggestBox=$('#name-suggestions'),typingStatus=$('#typing-status');
+const suggestionCache=new Map();let suggestionTimer=null,suggestionRevision=0,currentChoices=null,activeChoice=0;
+function nameToken(){const end=nameInput.selectionStart;if(end!==nameInput.selectionEnd)return null;const m=nameInput.value.slice(0,end).match(/[A-Za-z]+$/);return m?{word:m[0],start:end-m[0].length,end,value:nameInput.value}:null}
+function hideChoices(){suggestBox.replaceChildren();suggestBox.hidden=true;currentChoices=null}
+async function getHindiChoices(word){
+ const key=word.toLowerCase();if(suggestionCache.has(key))return suggestionCache.get(key);
+ const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),7000);
+ try{
+  const query=new URLSearchParams({text:word,itc:'hi-t-i0-und',num:'5',cp:'0',cs:'1',ie:'utf-8',oe:'utf-8'});
+  const response=await fetch('https://inputtools.google.com/request?'+query,{signal:controller.signal,credentials:'omit',referrerPolicy:'no-referrer'});
+  if(!response.ok)throw Error('Suggestions unavailable');
+  const data=await response.json();if(data[0]!=='SUCCESS')throw Error('Suggestions unavailable');
+  const choices=[...new Set(data[1]?.[0]?.[1]||[])].filter(s=>typeof s==='string'&&/[\u0900-\u097f]/.test(s)).slice(0,5);
+  if(!choices.length)throw Error('No Hindi suggestions');
+  suggestionCache.set(key,choices);return choices;
+ }finally{clearTimeout(timer)}
+}
+function chooseName(index){
+ const entry=currentChoices;if(!entry||nameInput.value!==entry.value||state().language!=='hi')return;
+ const text=entry.choices[index];nameInput.focus();nameInput.setRangeText(text,entry.start,entry.end,'end');
+ hideChoices();typingStatus.textContent='नाम की spelling जाँच लें।';nameInput.dispatchEvent(new Event('input',{bubbles:true}));
+}
+function displayChoices(token,choices){
+ currentChoices={...token,choices};activeChoice=0;suggestBox.replaceChildren();suggestBox.hidden=false;
+ choices.forEach((choice,index)=>{const button=document.createElement('button');button.type='button';button.textContent=choice;button.className='text-button';button.style.cssText='padding:8px 12px;border:1px solid #dbc4c8;border-radius:8px;margin:3px;background:#fff;color:#721e33';
+ button.addEventListener('mousedown',event=>event.preventDefault());button.addEventListener('click',()=>chooseName(index));suggestBox.append(button)});
+}
+async function suggestName(token,commit=false,expectedValue=token.value){
+ const request=++suggestionRevision;typingStatus.textContent='Hindi सुझाव आ रहे हैं…';
+ try{
+  const choices=await getHindiChoices(token.word);
+  if(request!==suggestionRevision||nameInput.value!==expectedValue||state().language!=='hi')return;
+  if(commit){
+   const savedStart=nameInput.selectionStart,savedEnd=nameInput.selectionEnd,focused=document.activeElement===nameInput;
+   nameInput.setRangeText(choices[0],token.start,token.end,'preserve');
+   const delta=choices[0].length-(token.end-token.start);
+   if(focused)nameInput.setSelectionRange(savedStart>=token.end?savedStart+delta:savedStart,savedEnd>=token.end?savedEnd+delta:savedEnd);
+   nameInput.dispatchEvent(new Event('input',{bubbles:true}));
+   displayChoices({value:nameInput.value,start:token.start,end:token.start+choices[0].length},choices);
+   typingStatus.textContent='गलत spelling हो तो नीचे दूसरा सुझाव चुनें।';
+  }else{displayChoices(token,choices);typingStatus.textContent='Space से पहला सुझाव; या नीचे सही नाम चुनें।'}
+ }catch(error){
+  if(request!==suggestionRevision||state().language!=='hi')return;
+  hideChoices();typingStatus.textContent='Hindi सुझाव नहीं मिले। Internet जाँचें या Hindi में नाम भरें। Roman spelling बदली नहीं गई।';
+ }
+}
+nameInput.addEventListener('input',event=>{
+ clearTimeout(suggestionTimer);++suggestionRevision;hideChoices();
+ if(state().language!=='hi'){typingStatus.textContent='English mode: नाम English में रहेगा।';return}
+ const token=nameToken();if(!token)return;
+ suggestionTimer=setTimeout(()=>suggestName(token),300);
+});
+nameInput.addEventListener('beforeinput',event=>{
+ if(event.isComposing||state().language!=='hi'||event.inputType!=='insertText'||!event.data||!/^[\s,.;!?]$/.test(event.data))return;
+ const token=nameToken();if(!token)return;
+ // Let the keyboard insert the separator before committing the captured word.
+ setTimeout(()=>{clearTimeout(suggestionTimer);if(nameInput.value===token.value.slice(0,token.end)+event.data+token.value.slice(token.end))suggestName(token,true,nameInput.value)},0);
+});
+nameInput.addEventListener('keydown',event=>{
+ if(event.isComposing||!currentChoices||state().language!=='hi')return;
+ if(event.key==='Escape'){hideChoices();return}
+ if(event.key==='ArrowDown'||event.key==='ArrowUp'){
+  event.preventDefault();activeChoice=(activeChoice+(event.key==='ArrowDown'?1:-1)+currentChoices.choices.length)%currentChoices.choices.length;
+  [...suggestBox.children].forEach((button,index)=>button.style.background=index===activeChoice?'#f5dfe5':'#fff');
+ }else if(event.key==='Enter'){event.preventDefault();event.stopPropagation();chooseName(activeChoice)}
+});
+form.addEventListener('change',()=>{++suggestionRevision;clearTimeout(suggestionTimer);hideChoices();typingStatus.textContent=state().language==='hi'?'नाम English में लिखें; Hindi सुझाव Google से मिलेंगे।':'English mode: नाम English में रहेगा।'});
+$('#next').addEventListener('click',()=>{++suggestionRevision;clearTimeout(suggestionTimer);hideChoices();typingStatus.textContent=''});
 
 form.addEventListener('input',()=>{showError('');render()});
 form.addEventListener('change',()=>{const en=state().language==='en';$('#family-help').textContent=en?'चुना होने पर ऊपर “(With family)” जुड़ेगा।':'चुना होने पर ऊपर “(सपरिवार)” जुड़ेगा।';$('#guest-name').placeholder=en?'e.g. Rajesh Sharma Ji':'जैसे: राजेश शर्मा जी';$('#address1').placeholder=en?'e.g. 24, Shastri Nagar':'जैसे: 24, शास्त्री नगर';$('#address2').placeholder=en?'e.g. Jaipur, Rajasthan':'जैसे: जयपुर, राजस्थान';render()});
