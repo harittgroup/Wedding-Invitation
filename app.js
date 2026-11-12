@@ -73,7 +73,7 @@ for(const id of ['address1','address2']){
 
 const nameInput=$('#guest-name'),suggestBox=$('#name-suggestions'),typingStatus=$('#typing-status');
 const suggestionCache=new Map();let suggestionTimer=null,suggestionRevision=0,currentChoices=null,activeChoice=0;
-function nameToken(){const end=nameInput.selectionStart;if(end!==nameInput.selectionEnd)return null;const m=nameInput.value.slice(0,end).match(/[A-Za-z]+$/);return m?{word:m[0],start:end-m[0].length,end,value:nameInput.value}:null}
+function nameToken(){const end=nameInput.selectionStart;if(end!==nameInput.selectionEnd)return null;const m=nameInput.value.slice(0,end).match(/[A-Za-z]+(?:[ \t]+[A-Za-z]+)*$/);return m?{word:m[0],start:end-m[0].length,end,value:nameInput.value}:null}
 function hideChoices(){suggestBox.replaceChildren();suggestBox.hidden=true;currentChoices=null}
 async function getHindiChoices(word){
  const key=word.toLowerCase();if(suggestionCache.has(key))return suggestionCache.get(key);
@@ -129,6 +129,7 @@ nameInput.addEventListener('beforeinput',event=>{
  // Let the keyboard insert the separator before committing the captured word.
  setTimeout(()=>{clearTimeout(suggestionTimer);if(nameInput.value===token.value.slice(0,token.end)+event.data+token.value.slice(token.end))suggestName(token,true,nameInput.value)},0);
 });
+nameInput.addEventListener('blur',()=>{clearTimeout(suggestionTimer);const token=nameToken();if(token&&state().language==='hi')suggestName(token,true)});
 nameInput.addEventListener('keydown',event=>{
  if(event.isComposing||!currentChoices||state().language!=='hi')return;
  if(event.key==='Escape'){hideChoices();return}
