@@ -83,11 +83,17 @@ footer{justify-content:center;gap:40px}
 dialog{width:auto;max-height:96vh}dialog img{width:auto;max-width:100%;max-height:calc(96vh - 60px);margin:auto}
 .glitter-row .inline-help{display:block;margin-top:1px}
 @font-face{font-family:Montserrat;font-weight:500;src:url('fonts/montserrat-latin-500-normal.woff2')}@font-face{font-family:Montserrat;font-weight:600;src:url('fonts/montserrat-latin-600-normal.woff2')}
-.credit{position:absolute;left:34px;bottom:34px;display:flex;align-items:center;gap:10px;text-decoration:none;z-index:1}
+.credit{position:absolute;left:34px;bottom:34px;display:flex;align-items:center;gap:10px;z-index:1}.credit a{text-decoration:none}.credit-venture a{color:inherit}.credit-logo{display:flex}.credit-venture a{border-bottom:1px solid transparent;transition:color .25s,border-color .25s}.credit-venture a:hover{color:#6b5a4c;border-color:#b98f3e77}
 .credit-t{display:flex;flex-direction:column;gap:1px;border-left:1px solid #b98f3e77;padding-left:12px;line-height:1.3}
 .credit-by{font-family:Cormorant,Georgia,serif;font-style:italic;font-weight:600;font-size:15px;color:#a8874f}
 .credit-name{font-family:Montserrat,Arial,sans-serif;font-weight:600;font-size:10.5px;letter-spacing:3.2px;color:#6b5a4c;margin-left:4px;transition:color .25s}
 .credit-venture{font-family:Cormorant,Georgia,serif;font-style:italic;font-weight:600;font-size:13.5px;color:#a8977f}
-.credit:hover .credit-name{color:#2b2220}
+.credit-name:hover,.credit-logo:hover+.credit-t .credit-name{color:#2b2220}
 footer{padding-bottom:130px}
 @media(max-width:620px){footer{padding-bottom:150px}.credit{left:18px;bottom:24px;gap:8px}.credit-name{letter-spacing:2.2px;font-size:9.5px}.credit-by{font-size:14px}.credit-venture{font-size:12.5px}}
+
+.top-mark{position:absolute;top:26px;right:34px;z-index:2;display:block;padding:6px}
+.top-mark span{display:block;width:24px;height:36px;-webkit-mask:url(art/hd-flame-gold.png) center/contain no-repeat;mask:url(art/hd-flame-gold.png) center/contain no-repeat;background:linear-gradient(115deg,#a07a34 0%,#c9a55a 38%,#fff3cf 50%,#c9a55a 62%,#a07a34 100%) 0 0/300% 100%;animation:tm-shine 5s ease-in-out infinite}
+@keyframes tm-shine{0%,55%{background-position:100% 0}85%,100%{background-position:0 0}}
+@media(prefers-reduced-motion:reduce){.top-mark span{animation:none;background-position:50% 0}}
+@media(max-width:620px){.top-mark{top:14px;right:12px}.top-mark span{width:20px;height:30px}}
