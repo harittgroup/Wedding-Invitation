@@ -81,3 +81,4 @@ footer{justify-content:center;gap:40px}
 .preview-caption{font-family:TiroHi,Georgia,serif;font-style:normal;font-weight:400;font-size:16px;color:#6d4a3a}
 @media(max-width:420px){.eyebrow{font-size:16px;letter-spacing:0}.eyebrow i{margin:0 8px 3px}}
 dialog{width:auto;max-height:96vh}dialog img{width:auto;max-width:100%;max-height:calc(96vh - 60px);margin:auto}
+.glitter-row .inline-help{display:block;margin-top:1px}

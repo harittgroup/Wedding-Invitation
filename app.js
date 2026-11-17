@@ -3,16 +3,43 @@ const W=763,H=515,S=4,$=s=>document.querySelector(s),form=$('#guest-form'),canva
 const image=new Image();let ready=false,busy=false,pdfBytes=null,lastMetrics=[];
 let prepared=null,prepareTimer=null,revision=0,lastKey=null;
 const clean=v=>v.normalize('NFC').replace(/[\u0000-\u001f\u007f]/g,' ').trim();
-const state=()=>({name:clean($('#guest-name').value),address1:clean($('#address1').value),address2:clean($('#address2').value),family:$('#family').checked,language:$('input[name=language]:checked').value,ink:$('input[name=ink]:checked').value,glitter:$('#glitter').checked});
+const state=()=>({name:clean($('#guest-name').value),address1:clean($('#address1').value),address2:clean($('#address2').value),family:$('#family').checked,language:$('input[name=language]:checked').value,ink:$('input[name=ink]:checked').value,glitter:$('#glitter').checked,natural:$('#natural').checked});
 function filename(name){return 'Wedding_Invitation_'+(name.replace(/[<>:"/\\|?*\u0000-\u001f]/g,'').replace(/\s+/g,'_').replace(/[. ]+$/g,'').slice(0,100)||'Guest')+'.pdf'}
 function fontFor(text){return /[\u0900-\u097f]/.test(text)?'Kalam, KalamLatin':'Caveat, KalamLatin'}
 function random(seed){return()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296}}
+function hashText(s){let h=2166136261;for(const ch of s){h^=ch.codePointAt(0);h=Math.imul(h,16777619)}return h>>>0}
+const graphemes=typeof Intl!=='undefined'&&Intl.Segmenter?new Intl.Segmenter('hi',{granularity:'grapheme'}):null;
+// Natural handwriting: small seeded variation per word and letter, so repeated letters never look identical.
+// Devanagari letters keep one baseline so the shirorekha and conjuncts stay joined.
+function drawNatural(lc,text,x,baseline,size,family,maxWidth){
+ const r=random(hashText(text)),R=(a,b)=>a+(b-a)*r(),hi=/[ऀ-ॿ]/.test(text),slope=R(-.01,.01),words=[];let total=0;
+ lc.font=`${size}px ${family}`;
+ for(const part of text.split(/(\s+)/)){
+  if(!part)continue;
+  if(/^\s+$/.test(part)){const adv=lc.measureText(part).width*R(.85,1.2);words.push({space:adv});total+=adv;continue}
+  const w={ws:size*R(.95,1.05),dy:R(-.04,.04)*size,rot:R(-.025,.025),cl:[],adv:0};
+  const parts=graphemes?[...graphemes.segment(part)].map(s=>s.segment):[part];
+  for(const g of parts){lc.font=`${w.ws}px ${family}`;const sx=R(.94,1.06),ls=hi?1:R(.93,1.07),adv=lc.measureText(g).width*sx*ls;
+   w.cl.push({g,sx,ls,dy:hi?0:R(-.035,.035)*size,rot:hi?0:R(-.05,.05),alpha:R(.8,1),lw:R(0,.55)});w.adv+=adv*1}
+  words.push(w);total+=w.adv;
+ }
+ const f=total>maxWidth?maxWidth/total*.98:1;lc.save();lc.translate(x,baseline);lc.scale(f,f);let cx=0;
+ for(const w of words){
+  if(w.space!==undefined){cx+=w.space;continue}
+  lc.save();lc.translate(cx,w.dy+cx*slope);lc.rotate(w.rot);let wx=0;
+  for(const c of w.cl){lc.font=`${w.ws}px ${family}`;const adv=lc.measureText(c.g).width;
+   lc.save();lc.translate(wx,c.dy);lc.rotate(c.rot);lc.scale(c.sx*c.ls,c.ls);lc.globalAlpha=c.alpha;lc.fillText(c.g,0,0);
+   if(c.lw>.12){lc.lineWidth=c.lw;lc.strokeStyle=lc.fillStyle;lc.strokeText(c.g,0,0)}lc.restore();wx+=adv*c.sx*c.ls}
+  lc.restore();cx+=w.adv;
+ }
+ lc.restore();lc.globalAlpha=1;
+}
 function write(text,x,baseline,width,size,st,kind){if(!text)return;
  const layer=document.createElement('canvas');layer.width=W*S;layer.height=H*S;const lc=layer.getContext('2d');lc.scale(S,S);lc.textBaseline='alphabetic';let metrics;
  // Fit visible ink bounds, including Devanagari vowel marks, within each ruled line.
  for(let n=0;n<4;n++){lc.font=`${size}px ${fontFor(text)}`;metrics=lc.measureText(text);const extent=Math.max(metrics.width,metrics.actualBoundingBoxRight+Math.max(0,metrics.actualBoundingBoxLeft));if(extent<=width)break;size*=width/extent*.985;}
  lc.font=`${size}px ${fontFor(text)}`;metrics=lc.measureText(text);const inkWidth=Math.max(metrics.width,metrics.actualBoundingBoxRight+Math.max(0,metrics.actualBoundingBoxLeft));const rule={name:266.5,address1:303.5,address2:339.5}[kind];if(rule)baseline=Math.min(baseline,rule-3-metrics.actualBoundingBoxDescent);const top=baseline-metrics.actualBoundingBoxAscent,bottom=baseline+metrics.actualBoundingBoxDescent;
- const base=st.ink==='red'?'#981c26':'#4c1522';lc.fillStyle=base;lc.fillText(text,x+Math.max(0,metrics.actualBoundingBoxLeft),baseline);
+ const base=st.ink==='red'?'#981c26':'#4c1522';lc.fillStyle=base;if(st.natural&&kind!=='family')drawNatural(lc,text,x+Math.max(0,metrics.actualBoundingBoxLeft),baseline,size,fontFor(text),width);else lc.fillText(text,x+Math.max(0,metrics.actualBoundingBoxLeft),baseline);
  if(st.glitter){lc.globalCompositeOperation='source-atop';const g=lc.createLinearGradient(0,top,0,bottom);g.addColorStop(0,st.ink==='red'?'#b93136':'#6b2231');g.addColorStop(.40,base);g.addColorStop(.48,st.ink==='red'?'#c55b48':'#8d4043');g.addColorStop(.56,base);g.addColorStop(1,st.ink==='red'?'#ae2629':'#591b2c');lc.fillStyle=g;lc.fillRect(x-1,top-1,width+3,bottom-top+3);
  const rnd=random(1739+Math.round(x*baseline));for(let i=0;i<width*(bottom-top)*1.2;i++){const px=x+rnd()*width,py=top+rnd()*(bottom-top);lc.fillStyle=i%12===0?'#fff0be':i%3===0?'#c99665':'#f3c49b';lc.globalAlpha=i%12===0?.86:.40;const r=i%12===0?.48:.24;lc.fillRect(px,py,r,r);}lc.globalAlpha=1;lc.globalCompositeOperation='source-over';}
  oc.drawImage(layer,0,0);lastMetrics.push({kind,text,size,x,top,bottom,right:x+inkWidth,maxRight:x+width});
