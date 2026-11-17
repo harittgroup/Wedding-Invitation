@@ -30,3 +30,24 @@ small,.fit-note,.optional,.status,.filename,.privacy-note,.preview-caption,.deta
 footer{font-size:13px}
 .step{width:28px;height:28px;font-size:11px}
 @media(max-width:760px){.form-panel{padding:20px}.preview-caption{font-size:12px}footer{font-size:12px}}
+
+/* Theme 2: Cream & Gold (card paper) */
+[data-theme=cream] body{background:radial-gradient(1200px 500px at 50% -10%,#fbefd6,transparent),#f4e6c9}
+[data-theme=cream] header{border-bottom:2px solid #c9a24a55}
+[data-theme=cream] .form-panel,[data-theme=cream] .preview-panel{background:#fbf1dc;border:1.5px solid #c9a24a;box-shadow:0 0 0 4px #fbf1dc,0 0 0 5px #c9a24a66,0 10px 30px #7a2a1f14}
+[data-theme=cream] h1,[data-theme=cream] h2,[data-theme=cream] .mark{color:#8e1f2c}
+[data-theme=cream] .field input{background:#fffaf0;border-color:#d9bf86}
+[data-theme=cream] .family-row{background:#fff6e4;border-color:#d9bf86}
+[data-theme=cream] .preview-mat{background:#ecd9b0}
+[data-theme=cream] .primary{background:linear-gradient(#a3222f,#7d1824);box-shadow:0 4px 0 #5a1019}
+[data-theme=cream] .step,[data-theme=cream] .page-badge{border-color:#c9a24a;color:#8e6a1f}
+/* Theme 3: Royal Maroon */
+[data-theme=royal] body{background:radial-gradient(1000px 600px at 50% -10%,#7a1a2c,transparent),#4a0f1c;color:#f6e7c8}
+[data-theme=royal] header{border-bottom:1px solid #d4af6a55}
+[data-theme=royal] .mark,[data-theme=royal] h1{color:#f1d28e}
+[data-theme=royal] .brand>span+span,[data-theme=royal] .eyebrow,[data-theme=royal] .private{color:#d4af6a;border-color:#d4af6a66}
+[data-theme=royal] .lead,[data-theme=royal] .intro-note,[data-theme=royal] footer{color:#e3cfa6}
+[data-theme=royal] .form-panel,[data-theme=royal] .preview-panel{background:#fbf1dc;border:1.5px solid #d4af6a;color:#392b2a;box-shadow:0 14px 40px #1a050a66}
+[data-theme=royal] .preview-mat{background:#ecd9b0}
+[data-theme=royal] .primary{background:linear-gradient(#a3222f,#7d1824);box-shadow:0 3px 0 #4a0f1c}
+[data-theme=royal] footer i{color:#d4af6a}
