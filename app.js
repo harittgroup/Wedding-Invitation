@@ -1,6 +1,6 @@
 (()=>{'use strict';
 const W=763,H=515,S=4,$=s=>document.querySelector(s),form=$('#guest-form'),canvas=$('#preview'),ctx=canvas.getContext('2d'),overlay=document.createElement('canvas');overlay.width=W*S;overlay.height=H*S;const oc=overlay.getContext('2d');
-const image=new Image(),mark=new Image();let ready=false,busy=false,pdfBytes=null,lastMetrics=[];
+const image=new Image(),mark=new Image();mark.onload=()=>{try{render()}catch(e){}};mark.src='art/card-mark.png';let ready=false,busy=false,pdfBytes=null,lastMetrics=[];
 let prepared=null,prepareTimer=null,revision=0,lastKey=null;
 const clean=v=>v.normalize('NFC').replace(/[\u0000-\u001f\u007f]/g,' ').trim();
 const state=()=>({name:clean($('#guest-name').value),address1:clean($('#address1').value),address2:clean($('#address2').value),family:$('#family').checked,language:$('input[name=language]:checked').value,ink:$('input[name=ink]:checked').value,glitter:$('#glitter').checked,natural:$('#natural').checked});
@@ -44,7 +44,7 @@ function write(text,x,baseline,width,size,st,kind){if(!text)return;
  const rnd=random(1739+Math.round(x*baseline));for(let i=0;i<width*(bottom-top)*1.2;i++){const px=x+rnd()*width,py=top+rnd()*(bottom-top);lc.fillStyle=i%12===0?'#fff0be':i%3===0?'#c99665':'#f3c49b';lc.globalAlpha=i%12===0?.86:.40;const r=i%12===0?.48:.24;lc.fillRect(px,py,r,r);}lc.globalAlpha=1;lc.globalCompositeOperation='source-over';}
  oc.drawImage(layer,0,0);lastMetrics.push({kind,text,size,x,top,bottom,right:x+inkWidth,maxRight:x+width});
 }
-function render(){if(!ready)return;const st=state();lastMetrics=[];oc.clearRect(0,0,overlay.width,overlay.height);oc.drawImage(mark,645*S,30*S,100*S,50*S);
+function render(){if(!ready)return;const st=state();lastMetrics=[];oc.clearRect(0,0,overlay.width,overlay.height);if(mark.complete&&mark.naturalWidth)oc.drawImage(mark,645*S,30*S,100*S,50*S);
  // Coordinates measured from the uploaded, unmodified 763 x 515 point PDF.
  // Baselines sit above all three printed rules; room is reserved for descenders.
  const hindi=/[\u0900-\u097f]/.test(st.name);write(st.name,468,261,205,hindi?20:25,st,'name');
@@ -191,6 +191,6 @@ $('#retry-pdf').addEventListener('click',()=>{$('#retry-pdf').hidden=true;lastKe
 $('#save-pdf').addEventListener('click',e=>{if(!prepared){e.preventDefault();return}$('#status').textContent='डाउनलोड शुरू हो गया। Downloads folder में देखें।'});
 window.addEventListener('pagehide',()=>{if(prepared){URL.revokeObjectURL(prepared.url);URL.revokeObjectURL(prepared.downloadUrl)}});
 $('#zoom').addEventListener('click',()=>{if(!ready)return;$('#large-preview').src=canvas.toDataURL('image/png');$('#full-preview').showModal()});$('#close-zoom').addEventListener('click',()=>$('#full-preview').close());
-async function init(){try{await Promise.all([document.fonts.load('20px Kalam','सपरिवार राजेश शर्मा'),document.fonts.load('20px KalamLatin','Rajesh Sharma'),document.fonts.load('24px Caveat','Rajesh Sharma'),new Promise((resolve,reject)=>{image.onload=resolve;image.onerror=reject;image.src='first-page.png'}),new Promise((resolve,reject)=>{mark.onload=resolve;mark.onerror=reject;mark.src='art/card-mark.png'}),fetch('invitation.pdf').then(r=>{if(!r.ok)throw new Error('Invitation unavailable');return r.arrayBuffer()}).then(b=>{pdfBytes=new Uint8Array(b);if(String.fromCharCode(...pdfBytes.slice(0,5))!=='%PDF-')throw new Error('Invalid invitation PDF')})]);if(!window.PDFLib)throw new Error('PDF engine unavailable');ready=true;$('#loading').hidden=true;$('#status').textContent='तैयार है · नाम भरकर शुरू करें';render()}catch(err){$('#loading').textContent='कार्ड लोड नहीं हुआ। पेज refresh करें।';showError('Invitation लोड नहीं हो सका। कृपया पेज refresh करें।');console.error(err)}}
+async function init(){try{await Promise.all([document.fonts.load('20px Kalam','सपरिवार राजेश शर्मा'),document.fonts.load('20px KalamLatin','Rajesh Sharma'),document.fonts.load('24px Caveat','Rajesh Sharma'),new Promise((resolve,reject)=>{image.onload=resolve;image.onerror=reject;image.src='first-page.png'}),fetch('invitation.pdf').then(r=>{if(!r.ok)throw new Error('Invitation unavailable');return r.arrayBuffer()}).then(b=>{pdfBytes=new Uint8Array(b);if(String.fromCharCode(...pdfBytes.slice(0,5))!=='%PDF-')throw new Error('Invalid invitation PDF')})]);if(!window.PDFLib)throw new Error('PDF engine unavailable');ready=true;$('#loading').hidden=true;$('#status').textContent='तैयार है · नाम भरकर शुरू करें';render()}catch(err){$('#loading').textContent='कार्ड लोड नहीं हुआ। पेज refresh करें।';showError('Invitation लोड नहीं हो सका। कृपया पेज refresh करें।');console.error(err)}}
 init();
 })();
