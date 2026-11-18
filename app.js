@@ -52,8 +52,8 @@ function render(){if(!ready)return;const st=state();lastMetrics=[];oc.clearRect(
  write(st.address2,497,334,181,/[\u0900-\u097f]/.test(st.address2)?18:23,st,'address2');
  if(st.family&&st.name)write(st.language==='hi'?'(सपरिवार)':'(With family)',433,225,104,st.language==='hi'?12:15,st,'family');
  ctx.clearRect(0,0,canvas.width,canvas.height);ctx.drawImage(image,0,0,canvas.width,canvas.height);ctx.drawImage(overlay,0,0);
- $('#filename').textContent=st.name?filename(st.name):'फाइल का नाम मेहमान के नाम पर होगा';
- const small=lastMetrics.some(m=>m.size<11);$('#fit-note').textContent=small?'यह विवरण बहुत लंबा है; अच्छी readability के लिए छोटा करें।':'लंबा नाम उपलब्ध जगह में अपने-आप फिट होगा।';
+ 
+ const small=lastMetrics.some(m=>m.size<11);$('#fit-note').textContent=small?'यह विवरण बहुत लंबा है; अच्छी readability के लिए छोटा करें।':'';
  queuePdf(st);$('#preview').setAttribute('aria-label',st.name?`Invitation for ${st.name}${st.family?', with family':''}`:'Original invitation preview');
 }
 function showError(message){$('#error').textContent=message;$('#error').hidden=!message}
@@ -177,7 +177,7 @@ form.addEventListener('change',resetFields);
 $('#next').addEventListener('click',()=>fields.forEach(f=>{f.reset();f.status.textContent=''}));
 
 form.addEventListener('input',()=>{showError('');render()});
-form.addEventListener('change',()=>{const en=state().language==='en';$('#family-help').textContent=en?'चुना होने पर ऊपर “(With family)” जुड़ेगा।':'चुना होने पर ऊपर “(सपरिवार)” जुड़ेगा।';$('#guest-name').placeholder=en?'e.g. Rajesh Sharma Ji':'जैसे: राजेश शर्मा जी';$('#address1').placeholder=en?'e.g. 24, Shastri Nagar':'जैसे: 24, शास्त्री नगर';$('#address2').placeholder=en?'e.g. Jaipur, Rajasthan':'जैसे: जयपुर, राजस्थान';render()});
+form.addEventListener('change',()=>{const en=state().language==='en';$('#guest-name').placeholder=en?'e.g. Rajesh Sharma Ji':'जैसे: राजेश शर्मा जी';$('#address1').placeholder=en?'e.g. 24, Shastri Nagar':'जैसे: 24, शास्त्री नगर';$('#address2').placeholder=en?'e.g. Jaipur, Rajasthan':'जैसे: जयपुर, राजस्थान';render()});
 $('#example').addEventListener('click',()=>{const en=state().language==='en';$('#guest-name').value=en?'Rajesh Sharma Ji':'राजेश शर्मा जी';$('#address1').value=en?'24, Shastri Nagar':'24, शास्त्री नगर';$('#address2').value=en?'Jaipur, Rajasthan':'जयपुर, राजस्थान';$('#family').checked=true;showError('');render()});
 $('#next').addEventListener('click',()=>{if(busy)return;['guest-name','address1','address2'].forEach(id=>$('#'+id).value='');$('#family').checked=false;showError('');$('#status').textContent='अगले मेहमान का नाम भरें।';render();$('#guest-name').focus()});
 function addLink(doc,page,rect,url){const L=PDFLib,ctx=doc.context;const a=ctx.obj({Type:'Annot',Subtype:'Link',Rect:rect,Border:[0,0,0],A:{Type:'Action',S:'URI',URI:L.PDFString.of(url)}});const ref=ctx.register(a);const k=L.PDFName.of('Annots');let arr=page.node.lookup(k);if(!arr){arr=ctx.obj([]);page.node.set(k,arr)}arr.push(ref)}

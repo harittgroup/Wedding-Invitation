@@ -97,3 +97,5 @@ footer{padding-bottom:130px}
 @keyframes tm-shine{0%,55%{background-position:100% 0}85%,100%{background-position:0 0}}
 @media(prefers-reduced-motion:reduce){.top-mark span{animation:none;background-position:50% 0}}
 @media(max-width:620px){.top-mark{top:14px;right:12px}.top-mark span{width:20px;height:30px}}
+
+.fit-note:empty{display:none}

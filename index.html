@@ -15,7 +15,7 @@
 <meta name="twitter:title" content="Pulkit &amp; Varsha Wedding Invitation Card">
 <meta name="twitter:description" content="Celebrate the wedding of Pulkit &amp; Varsha • 02 December 2026.">
 <meta name="twitter:image" content="https://wedding-invitation.haritt.com/wedding-preview-floral.jpg">
-<link rel="stylesheet" href="style.css?v=23"><script defer src="pdf-lib.min.js"></script><script defer src="app.js?v=12"></script></head>
+<link rel="stylesheet" href="style.css?v=24"><script defer src="pdf-lib.min.js"></script><script defer src="app.js?v=13"></script></head>
 <body>
 <header class="hero"><a class="top-mark" href="https://developers.haritt.com/" target="_blank" rel="noopener" aria-label="Haritt Developers"><span></span></a><div class="wrap"><a class="brand" href="./"><span class="mark">न्योता</span></a>
 <p class="eyebrow">Pulkit &amp; Varsha <i></i> 02 December 2026</p>
@@ -29,7 +29,7 @@
 <div class="step-card"><div class="step-head"><span class="step">2</span><h2>मेहमान की जानकारी</h2></div>
 <label class="field">मेहमान का नाम <span class="required">*</span><input id="guest-name" type="text" maxlength="100" required autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="जैसे: राजेश शर्मा जी" dir="auto"><small>“श्रीमान्” कार्ड पर पहले से छपा है।</small></label>
 <div id="name-suggestions" role="group" aria-label="Hindi name suggestions" hidden></div><p id="typing-status" class="fit-note" role="status" aria-live="polite">नाम English में लिखें, Hindi में अपने-आप बदलेगा।</p>
-<label class="family-row"><input id="family" type="checkbox"><span><strong>With family / सपरिवार</strong><small id="family-help">चुना होने पर ऊपर “(सपरिवार)” जुड़ेगा।</small></span></label>
+<label class="family-row"><input id="family" type="checkbox"><span><strong>With family / सपरिवार</strong></span></label>
 <label class="field">पता — लाइन 1 <span class="optional">वैकल्पिक</span><input id="address1" type="text" maxlength="100" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="जैसे: 24, शास्त्री नगर" dir="auto"></label>
 <div id="address1-suggestions" role="group" aria-label="Hindi address suggestions" hidden></div>
 <label class="field">पता — लाइन 2 <span class="optional">वैकल्पिक</span><input id="address2" type="text" maxlength="100" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="जैसे: जयपुर, राजस्थान" dir="auto"></label>
@@ -38,10 +38,10 @@
 <div class="inks"><label><input type="radio" name="ink" value="red" checked><span><i class="red"></i>Ruby red</span></label><label><input type="radio" name="ink" value="maroon"><span><i class="maroon"></i>Maroon</span></label></div>
 <label class="glitter-row"><input id="glitter" type="checkbox" checked><span>Glitter pen finish</span></label>
 <label class="glitter-row"><input id="natural" type="checkbox"><span>Natural handwriting <small class="inline-help">हर अक्षर थोड़ा अलग, असली हाथ की लिखावट जैसा</small></span></label>
-<p id="fit-note" class="fit-note">लंबा नाम उपलब्ध जगह में अपने-आप फिट होगा।</p><p id="error" role="alert" hidden></p></div>
-<div class="actions"><a id="download" class="primary disabled" role="button" aria-disabled="true"><span>↓</span> PDF डाउनलोड करें</a><div class="save-options"><a id="save-pdf" hidden>डाउनलोड नहीं हुआ? यहाँ दबाएँ</a><a id="open-pdf" target="_blank" rel="noopener" hidden>PDF देखें ↗</a></div><button id="retry-pdf" class="text-button" type="button" hidden>फिर प्रयास करें</button><p class="filename" id="filename">फाइल का नाम मेहमान के नाम पर होगा</p><p id="status" class="status" role="status" aria-live="polite">कार्ड तैयार हो रहा है…</p><button id="next" type="button" class="next">अगला मेहमान <span>→</span></button></div>
+<p id="fit-note" class="fit-note"></p><p id="error" role="alert" hidden></p></div>
+<div class="actions"><a id="download" class="primary disabled" role="button" aria-disabled="true"><span>↓</span> PDF डाउनलोड करें</a><div class="save-options"><a id="save-pdf" hidden>डाउनलोड नहीं हुआ? यहाँ दबाएँ</a><a id="open-pdf" target="_blank" rel="noopener" hidden>PDF देखें ↗</a></div><button id="retry-pdf" class="text-button" type="button" hidden>फिर प्रयास करें</button><p id="status" class="status" role="status" aria-live="polite">कार्ड तैयार हो रहा है…</p><button id="next" type="button" class="next">अगला मेहमान <span>→</span></button></div>
 </form></section>
-<section class="preview-panel"><div class="preview-head"><h2>आपका निमंत्रण</h2><span class="page-badge">पेज 1 / 4</span></div><div class="preview-mat"><canvas id="preview" width="3052" height="2060" aria-label="Personalized invitation first page preview" role="img"></canvas><div id="loading">आपका invitation लोड हो रहा है…</div><button id="zoom" type="button" class="zoom">⛶ बड़ा देखें</button></div></section>
+<section class="preview-panel"><div class="preview-head"><h2>आपका निमंत्रण</h2></div><div class="preview-mat"><canvas id="preview" width="3052" height="2060" aria-label="Personalized invitation first page preview" role="img"></canvas><div id="loading">आपका invitation लोड हो रहा है…</div><button id="zoom" type="button" class="zoom">⛶ बड़ा देखें</button></div></section>
 </div>
 <footer><span>एक शुभ शुरुआत। एक निजी निमंत्रण।</span><span>पुलकित <i>♥</i> वर्षा</span></footer>
 </main>
